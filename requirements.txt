@@ -1,0 +1,2 @@
+AdvancedHTMLParser==9.0.1
+QueryableList==3.1.0
