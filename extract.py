@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import urllib.request
 import AdvancedHTMLParser
@@ -11,9 +12,12 @@ try :
     text = data.decode("utf-8") 
     parser.parseStr(text)
 
-    items = parser.getElementsByName("items")
-    items = parser.getElementsByClassName("pirulito__text-subtitle--default")
-    print(items)
+    itens = parser.getElementsByClassName("feed-post-link")
+    for item in itens:
+        print(item.textContent)
+        print(item.getAttribute("href"))
+        print("\n")
+    
 
 except UnicodeDecodeError:
     print("Não foi possivel baixar do site especificado: " + url)
