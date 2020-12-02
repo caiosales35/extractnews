@@ -42,7 +42,13 @@ class WebDados(Data):
 # pode-se fazer a leiura direta do terminar, ou ainda de um arquivo, atualmente é estatico.
 # URL: [array com classes de elemtos para recuperar da pagina]
 def getFonts():
-    dicionario_fontes = {"https://g1.globo.com/": ["feed-post-link"], "https://www.saocarlosagora.com.br/": ["tituloVitrine"] }
+    #dicionario_fontes = {"https://g1.globo.com/": ["feed-post-link"], "https://www.saocarlosagora.com.br/": ["tituloVitrine"] }
+    dicionario_fontes = {
+        "https://g1.globo.com/": ["feed-post-link"], 
+        "https://www.saocarlosagora.com.br/": ["tituloVitrine"],
+        "https://www.saocarlosagora.com.br/ultimas-noticias/": ["ultimas-noticias"]
+        }
+    
     return dicionario_fontes
 
 urls = getFonts()
