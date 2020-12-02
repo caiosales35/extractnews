@@ -19,9 +19,9 @@ def getHTML(url):
 
 
 # Se quiser alterar os sites de pesquisas e as classes dos elementos para serem recuperados;
-# alterar o preenchimento da variavel URL. Atulmente tratada como um dicionario;
+# alterar o preenchimento da variavel dicionario_fontes. Atulmente tratada como um dicionario;
 # pode-se fazer a leiura direta do terminar, ou ainda de um arquivo, atualmente é estatico.
-# URL_PAGINA: [array com classes de elemtos para recuperar da pagina]
+# URL: [array com classes de elemtos para recuperar da pagina]
 def getFonts():
     dicionario_fontes = {"https://g1.globo.com/": ["feed-post-link"], "https://www.saocarlosagora.com.br/": ["tituloVitrine"] }
     return dicionario_fontes
