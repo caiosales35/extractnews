@@ -13,12 +13,13 @@ class Data(metaclass=abc.ABCMeta):
 
 # classe que retorna dados da web
 class WebDados(Data):
-    def __init__(self, encode="utf-8"):
+    def __init__(self, encode="utf-8", headers={'User-Agent': 'Mozilla/5.0'}):
         self._encode = encode
+        self._headers = headers
     # Se quiser alterar a forma de obter HTML da web, deve se alterar a forma de fazer
     # requisições (atualmente com urlib); retornando o HTML da pagina na variavel text
     def getHTML(self, url):
-        request = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        request = Request(url, headers=self._headers)
         response = urlopen(request).read()
         try :
             text = response.decode(self._encode)
@@ -30,6 +31,10 @@ class WebDados(Data):
         self._encode = encode
     def getEncode(self):
         return self._encode
+    def setHeaders(self, headers):
+        self._headers = headers
+    def getHeaders(self):
+        return self._headers
 
 
 # Se quiser alterar os sites de pesquisas e as classes dos elementos para serem recuperados;
