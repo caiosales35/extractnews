@@ -5,7 +5,7 @@ import AdvancedHTMLParser
 
 parser = AdvancedHTMLParser.AdvancedHTMLParser()
 
-# se quiser alterar a forma de obter HTML da web, deve se alterar a forma de fazer
+# Se quiser alterar a forma de obter HTML da web, deve se alterar a forma de fazer
 # requisições (atualmente com urlib); retornando o HTML da pagina na variavel text
 def getHTML(url):
     response = urllib.request.urlopen(url)
@@ -18,7 +18,7 @@ def getHTML(url):
         print("Erro de decodificação!")
 
 
-# Se quiser alterar os sites de pesquisas e as classes para serem recuperadas;
+# Se quiser alterar os sites de pesquisas e as classes dos elementos para serem recuperados;
 # alterar o preenchimento da variavel URL. Atulmente tratada como um dicionario;
 # pode-se fazer a leiura direta do terminar, ou ainda de um arquivo, atualmente é estatico.
 # URL_PAGINA: [array com classes de elemtos para recuperar da pagina]
