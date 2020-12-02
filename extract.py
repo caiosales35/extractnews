@@ -1,22 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import urllib.request
+#import urllib.request 
+from urllib.request import Request, urlopen
 import AdvancedHTMLParser
 import abc
 
-# interface de requisições, obrigatorio implementar um metodo que retorne um html
-class Requests(metaclass=abc.ABCMeta):
+# interface para retornar dados, obrigatorio implementar um metodo que retorne um html
+class Data(metaclass=abc.ABCMeta):
      @abc.abstractmethod
      def getHTML(self, url):
         return
 
-class WebRequest(Requests):
+# classe que retorna dados da web
+class WebDados(Data):
     def __init__(self, encode="utf-8"):
         self._encode = encode
     # Se quiser alterar a forma de obter HTML da web, deve se alterar a forma de fazer
     # requisições (atualmente com urlib); retornando o HTML da pagina na variavel text
     def getHTML(self, url):
-        response = urllib.request.urlopen(url).read()
+        request = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = urlopen(request).read()
         try :
             text = response.decode(self._encode)
             return text
@@ -29,7 +32,6 @@ class WebRequest(Requests):
         return self._encode
 
 
-
 # Se quiser alterar os sites de pesquisas e as classes dos elementos para serem recuperados;
 # alterar o preenchimento da variavel dicionario_fontes. Atulmente tratada como um dicionario;
 # pode-se fazer a leiura direta do terminar, ou ainda de um arquivo, atualmente é estatico.
@@ -38,17 +40,21 @@ def getFonts():
     dicionario_fontes = {"https://g1.globo.com/": ["feed-post-link"], "https://www.saocarlosagora.com.br/": ["tituloVitrine"] }
     return dicionario_fontes
 
-parser = AdvancedHTMLParser.AdvancedHTMLParser()
 urls = getFonts()
-html = WebRequest().getHTML("https://g1.globo.com/") # passar url de urls
-  
-parser.parseStr(html)
-itens = parser.getElementsByClassName("feed-post-link")
+parser = AdvancedHTMLParser.AdvancedHTMLParser()
 
-for item in itens:
-    print(item.textContent)
-    print(item.getAttribute("href"))
-    print("\n")
+for url, values in urls.items():
+    print(url)
+    html = WebDados().getHTML(url) # passar url de urls
+    parser.parseStr(html)
+    
+    itens = parser.getElementsByClassName(values[0]) # passar classe do elemtno a ser recuperado
+    # posteriormente fazer um foreach para cada classe
+
+    for item in itens:
+        print(item.textContent)
+        print(item.getAttribute("href"))
+        print("\n")
 
 
-# criar funcao para armazenar dados em arquivos
+# criar classe para armazenar dados em arquivos
