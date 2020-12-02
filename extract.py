@@ -36,36 +36,93 @@ class WebDados(Data):
     def getHeaders(self):
         return self._headers
 
+# interface para extrair noticias de html de portais web, obrigatorio implementar 
+# o metodo get (foma de extração) de cada classe de cada portal de noticias
+class extractNews(metaclass=abc.ABCMeta):
+    def __init__(self, url, classe=None, tag=None):
+        self._url = url
+        self._classe = classe
+        self._tag = tag
+        html = WebDados().getHTML(self._url)
+        self._parser = AdvancedHTMLParser.AdvancedHTMLParser()
+        self._parser.parseStr(html)
 
-# Se quiser alterar os sites de pesquisas e as classes dos elementos para serem recuperados;
-# alterar o preenchimento da variavel dicionario_fontes. Atulmente tratada como um dicionario;
+    def getUrl(self):
+        return self._url
+    def setUtl(self, url):
+        self._url = url
+    def getClasse(self):
+        return self._classe
+    def setClasse(self, classe):
+        self._classe = classe
+    def getTag(self):
+        return self._tag
+    def setTag(self, tag):
+        self._tag = tag
+
+    @abc.abstractmethod
+    def getNews(self):
+        return
+
+class SaoCarlosAgora(extractNews):
+    def getNews(self):
+        itens = self._parser.getElementsByClassName(self._classe)
+        dados = dict([])
+        for item in itens:
+            dados[item.textContent] = item.getAttribute("href")
+        return dados
+
+class SaoCarlosAgoraUltimas(extractNews):
+    def getNews(self):
+        itens = self._parser.getElementsByTagName(self._tag)
+        dados = dict([])
+        for item in itens:
+            dados[item.textContent] = item.parentNode.getAttribute("href")
+        return dados
+
+class G1(extractNews):
+    def getNews(self):
+        itens = self._parser.getElementsByClassName(self._classe)
+        dados = dict([])
+        for item in itens:
+            dados[item.textContent] = item.getAttribute("href")
+        return dados
+
+class Uol(extractNews):
+    def getNews(self):
+        itens = self._parser.getElementsByClassName(self._classe)
+        dados = dict([])
+        for item in itens:
+            dados[item.textContent.strip()] = item.parentNode.getAttribute("href")
+        return dados
+
+
+# Se quiser alterar os sites de pesquisas, as classes e / ou tags dos elementos para serem recuperados;
+# alterar o preenchimento da variavel dicionario_fontes. Atulmente tratada com um array de arrays;
 # pode-se fazer a leiura direta do terminar, ou ainda de um arquivo, atualmente é estatico.
-# URL: [array com classes de elemtos para recuperar da pagina]
+# Elemento: [URL, CLASSE, TAG]
 def getFonts():
-    #dicionario_fontes = {"https://g1.globo.com/": ["feed-post-link"], "https://www.saocarlosagora.com.br/": ["tituloVitrine"] }
-    dicionario_fontes = {
-        "https://g1.globo.com/": ["feed-post-link"], 
-        "https://www.saocarlosagora.com.br/": ["tituloVitrine"],
-        "https://www.saocarlosagora.com.br/ultimas-noticias/": ["ultimas-noticias"]
-        }
+    dicionario_fontes = [
+            ["https://g1.globo.com/", "feed-post-link", None], 
+            ["https://www.saocarlosagora.com.br/", "tituloVitrine", None],
+            ["https://www.saocarlosagora.com.br/ultimas-noticias/", "ultimas-noticias", "h3"],
+            ["https://noticias.uol.com.br/", "thumb-caption", None]
+    ]
     
     return dicionario_fontes
 
 urls = getFonts()
-parser = AdvancedHTMLParser.AdvancedHTMLParser()
 
-for url, values in urls.items():
-    print(url)
-    html = WebDados().getHTML(url) # passar url de urls
-    parser.parseStr(html)
-    
-    itens = parser.getElementsByClassName(values[0]) # passar classe do elemtno a ser recuperado
-    # posteriormente fazer um foreach para cada classe
+dados = []
+dados_g1 = G1(urls[0][0], urls[0][1], urls[0][2]).getNews()
+dados_saoCarlosAgora = SaoCarlosAgora(urls[1][0], urls[1][1], urls[1][2]).getNews()
+dados_saoCarlosAgoraUltimas = SaoCarlosAgoraUltimas(urls[2][0], urls[2][1], urls[2][2]).getNews()
+dados_uol = Uol(urls[3][0], urls[3][1], urls[3][2]).getNews()
 
-    for item in itens:
-        print(item.textContent)
-        print(item.getAttribute("href"))
-        print("\n")
+dados.append(dados_g1)
+dados.append(dados_saoCarlosAgora)
+dados.append(dados_saoCarlosAgoraUltimas)
+dados.append(dados_uol)
 
-
-# criar classe para armazenar dados em arquivos
+print(dados)
+# criar classe para armazenar dados em arquivos csv
