@@ -6,11 +6,33 @@ import AdvancedHTMLParser
 import abc
 import csv
 import codecs
+import sys
+
+#Essa classe administra os argumentos de entrada e os disponibiliza futuramente
+class ManagerArgs():
+    def __init__(self, args):
+        self._args = args
+
+    def get_url_arg(self):
+        return self._args[0]
+    def get_class_arg(self):
+        return self._args[1]
+    def get_tag_arg(self):
+        return self._args[2]
+    def get_outputfile_arg(self):
+        return self._args[3]
+
+    def parsedArgs(self,args):
+        if(len(args) != 4):
+            print('Use: extract.py <url> <classe> <tag> <arquivodesaida.csv>')
+            return
+        else:
+            return ManagerArgs(args)
 
 # interface para retornar dados, obrigatorio implementar um metodo que retorne um html
 class Data(metaclass=abc.ABCMeta):
-     @abc.abstractmethod
-     def getHTML(self, url):
+    @abc.abstractmethod
+    def getHTML(self, url):
         return
 
 # classe que retorna dados da web
@@ -42,31 +64,17 @@ class WebDados(Data):
 # o metodo get (forma de extração) de cada classe de cada portal de noticias
 class extractNews(metaclass=abc.ABCMeta):
     def __init__(self, url, classe=None, tag=None):
-        self._url = url
         self._classe = classe
-        self._tag = tag
+        self._url = url
         html = WebDados().getHTML(self._url)
         self._parser = AdvancedHTMLParser.AdvancedHTMLParser()
         self._parser.parseStr(html)
-
-    def getUrl(self):
-        return self._url
-    def setUtl(self, url):
-        self._url = url
-    def getClasse(self):
-        return self._classe
-    def setClasse(self, classe):
-        self._classe = classe
-    def getTag(self):
-        return self._tag
-    def setTag(self, tag):
-        self._tag = tag
 
     @abc.abstractmethod
     def getNews(self):
         return
 
-class SaoCarlosAgora(extractNews):
+class PortalDeNoticias(extractNews):
     def getNews(self):
         itens = self._parser.getElementsByClassName(self._classe)
         dados = dict([])
@@ -74,34 +82,10 @@ class SaoCarlosAgora(extractNews):
             dados[item.textContent] = item.getAttribute("href")
         return dados
 
-class SaoCarlosAgoraUltimas(extractNews):
-    def getNews(self):
-        itens = self._parser.getElementsByTagName(self._tag)
-        dados = dict([])
-        for item in itens:
-            dados[item.textContent] = item.parentNode.getAttribute("href")
-        return dados
-
-class G1(extractNews):
-    def getNews(self):
-        itens = self._parser.getElementsByClassName(self._classe)
-        dados = dict([])
-        for item in itens:
-            dados[item.textContent] = item.getAttribute("href")
-        return dados
-
-class Uol(extractNews):
-    def getNews(self):
-        itens = self._parser.getElementsByClassName(self._classe)
-        dados = dict([])
-        for item in itens:
-            dados[item.textContent.strip()] = item.parentNode.getAttribute("href")
-        return dados
-
-
-# Se quiser alterar os sites de pesquisas, as classes e / ou tags dos elementos para serem recuperados;
-# alterar o preenchimento da variavel dicionario_fontes. Atulmente tratada com um array de arrays;
-# pode-se fazer a leiura direta do terminar, ou ainda de um arquivo, atualmente é estatico.
+'''
+# Agora este dicionario serve somente para consulta.
+# Para pesquisar diferentes urls, classes, tags e nome do arquivo csv não é preciso fazer alterações aqui,
+# basta informar os novos parametros na linha de comando (:
 # Elemento: [URL, CLASSE, TAG]
 def getFonts():
     dicionario_fontes = [
@@ -112,26 +96,30 @@ def getFonts():
     ]
     
     return dicionario_fontes
+'''
+class WriteCSV():
+    def __init__(self, outputfile, queryResult):
+        #trata o caso em que o usuário digita sem indicar a extensão
+        nameFile = outputfile if(".csv" in outputfile) else outputfile + '.csv' 
+        try:
+            with codecs.open(nameFile, 'w', 'utf-8') as csv_file:  
+                writer = csv.writer(csv_file)
+                for key, value in queryResult.items():
+                    writer.writerow([key, value])
+            csv_file.close()
+        except IOError:         
+            print("Operação de saída falhou.")
 
-urls = getFonts()
+def main(argv):
+   parsedArgs = ManagerArgs(None).parsedArgs(argv)
+   if(parsedArgs is None):
+        return
 
-dados = []
-dados_g1 = G1(urls[0][0], urls[0][1], urls[0][2]).getNews()
-dados_saoCarlosAgora = SaoCarlosAgora(urls[1][0], urls[1][1], urls[1][2]).getNews()
-dados_saoCarlosAgoraUltimas = SaoCarlosAgoraUltimas(urls[2][0], urls[2][1], urls[2][2]).getNews()
-dados_uol = Uol(urls[3][0], urls[3][1], urls[3][2]).getNews()
+   #recebe os dados da consulta 
+   dados = PortalDeNoticias(parsedArgs.get_url_arg(), parsedArgs.get_class_arg(), parsedArgs.get_tag_arg()).getNews()
+   
+   #escreve os resultados em um arquivo csv 
+   WriteCSV(parsedArgs.get_outputfile_arg(), dados)
 
-dados.append(dados_g1)
-dados.append(dados_saoCarlosAgora)
-dados.append(dados_saoCarlosAgoraUltimas)
-dados.append(dados_uol)
-
-class writeCSV():
-    try:
-        with codecs.open('dict.csv', 'w', 'utf-8') as csv_file:  
-            writer = csv.writer(csv_file)
-            for key, value in dados[0].items():
-                writer.writerow([key, value])
-        csv_file.close()
-    except IOError:           # operação de entrada/saída falhou
-        print("I/O error")
+if __name__ == "__main__":
+    main(sys.argv[1:])
