@@ -4,6 +4,8 @@
 from urllib.request import Request, urlopen
 import AdvancedHTMLParser
 import abc
+import csv
+import codecs
 
 # interface para retornar dados, obrigatorio implementar um metodo que retorne um html
 class Data(metaclass=abc.ABCMeta):
@@ -37,7 +39,7 @@ class WebDados(Data):
         return self._headers
 
 # interface para extrair noticias de html de portais web, obrigatorio implementar 
-# o metodo get (foma de extração) de cada classe de cada portal de noticias
+# o metodo get (forma de extração) de cada classe de cada portal de noticias
 class extractNews(metaclass=abc.ABCMeta):
     def __init__(self, url, classe=None, tag=None):
         self._url = url
@@ -124,5 +126,12 @@ dados.append(dados_saoCarlosAgora)
 dados.append(dados_saoCarlosAgoraUltimas)
 dados.append(dados_uol)
 
-print(dados)
-# criar classe para armazenar dados em arquivos csv
+class writeCSV():
+    try:
+        with codecs.open('dict.csv', 'w', 'utf-8') as csv_file:  
+            writer = csv.writer(csv_file)
+            for key, value in dados[0].items():
+                writer.writerow([key, value])
+        csv_file.close()
+    except IOError:           # operação de entrada/saída falhou
+        print("I/O error")
