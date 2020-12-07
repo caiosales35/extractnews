@@ -24,6 +24,7 @@ class ManagerArgs():
 
     def parsedArgs(self,args):
         if(len(args) != 4):
+            print('Argumentos insuficientes')
             print('Use: extract.py <url> <classe> <tag> <arquivodesaida.csv>')
             return
         else:
@@ -106,9 +107,10 @@ class WriteCSV():
                 writer = csv.writer(csv_file)
                 for key, value in queryResult.items():
                     writer.writerow([key, value])
+            print('Arquivo ' + nameFile + ' gerado com sucesso.')
             csv_file.close()
         except IOError:         
-            print("Operação de saída falhou.")
+            print("Operação de saída falhou. Não foi possível gerar o arquivo.")
 
 def main(argv):
    parsedArgs = ManagerArgs(None).parsedArgs(argv)
