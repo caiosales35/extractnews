@@ -13,7 +13,7 @@ Esse projeto foi desenvolvido com as seguintes tecnologias:
 
 Para rodar o projeto:
 
-`$ python extract.py`
+`$ python extract.py <url> <classe> <tag> <nomearqdesaida.csv>`
 
 ## Equipe
 * Caio Sales
